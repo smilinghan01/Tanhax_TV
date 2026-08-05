@@ -726,7 +726,7 @@ export default function PanSouConfigPanel({
 
                 <div className='rounded-lg border border-gray-100 dark:border-gray-700/50 bg-gray-50 dark:bg-gray-900/30 p-3'>
                   <p className='text-xs text-gray-600 dark:text-gray-400'>
-                    如填写用户名和密码，DecoTV 会先调用 PanSou 登录接口获取
+                    如填写用户名和密码，TanhaxTV会先调用 PanSou 登录接口获取
                     JWT，再以 Authorization: Bearer ... 请求搜索接口。
                   </p>
                 </div>

@@ -74,7 +74,7 @@ describe('dandanplay server integration helpers', () => {
     expect(url.searchParams.has('anime')).toBe(false);
   });
 
-  it('uses the maintainer DecoTV deployment as the default Vercel relay', () => {
+  it('uses the maintainer TanhaxTVdeployment as the default Vercel relay', () => {
     delete process.env.DANDANPLAY_RELAY_URL;
     delete process.env.DOCKER_ENV;
 

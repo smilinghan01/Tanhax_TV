@@ -9057,7 +9057,7 @@ const PanSouConfigComponent = ({
             服务连接
           </h4>
           <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
-            DecoTV 会将 /api/pansou/search 请求转发到此服务节点
+            TanhaxTV会将 /api/pansou/search 请求转发到此服务节点
           </p>
         </div>
 

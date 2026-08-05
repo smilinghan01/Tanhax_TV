@@ -1560,7 +1560,7 @@ function LivePageClient() {
       super(config);
       const load = this.load.bind(this);
       this.load = function (context: any, config: any, callbacks: any) {
-        // Only DecoTV proxy requests should receive DecoTV-specific params.
+        // Only TanhaxTVproxy requests should receive DecoTV-specific params.
         if (isDecoProxyUrl(context.url)) {
           try {
             const url = new URL(context.url, window.location.href);

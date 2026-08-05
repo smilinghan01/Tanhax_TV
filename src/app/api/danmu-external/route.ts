@@ -1099,8 +1099,8 @@ async function fetchFromManagedRelay(
         {
           code: response.ok ? 502 : response.status,
           message: response.ok
-            ? 'DecoTV 托管弹幕中继返回了无效响应'
-            : `DecoTV 托管弹幕中继不可用: HTTP ${response.status}`,
+            ? 'TanhaxTV托管弹幕中继返回了无效响应'
+            : `TanhaxTV托管弹幕中继不可用: HTTP ${response.status}`,
           danmus: [],
           count: 0,
           source: 'managed-relay',
@@ -1119,7 +1119,7 @@ async function fetchFromManagedRelay(
     return NextResponse.json(
       {
         code: 502,
-        message: 'DecoTV 托管弹幕中继请求失败，请稍后重试',
+        message: 'TanhaxTV托管弹幕中继请求失败，请稍后重试',
         danmus: [],
         count: 0,
         source: 'managed-relay',
@@ -1142,7 +1142,7 @@ async function fetchFromManagedRelay(
 //   - 仅服务端使用 DANDANPLAY_APP_ID 和 DANDANPLAY_APP_SECRET
 //
 // 第三优先级：维护者托管中继
-//   - Vercel Fork 无需持有凭证，默认转发至维护者控制的 DecoTV 实例
+//   - Vercel Fork 无需持有凭证，默认转发至维护者控制的 TanhaxTV实例
 //   - Docker / VPS 仅在显式配置 DANDANPLAY_RELAY_URL 时使用中继
 //   - 中继请求会绕过该实例的自定义节点配置，直接使用其服务端凭证
 // ============================================================================
@@ -1171,7 +1171,7 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         code: 503,
-        message: 'DecoTV 托管弹幕中继已暂停服务',
+        message: 'TanhaxTV托管弹幕中继已暂停服务',
         danmus: [],
         count: 0,
         source: 'managed-relay',

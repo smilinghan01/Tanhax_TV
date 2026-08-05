@@ -27,7 +27,7 @@ export function getAuthCookieOptions(
   return {
     path: '/',
     expires,
-    // DecoTV login is same-origin; Lax works for HTTP LAN, localhost and HTTPS
+    // TanhaxTVlogin is same-origin; Lax works for HTTP LAN, localhost and HTTPS
     // without creating the invalid SameSite=None + Secure=false pair.
     sameSite: 'lax',
     // Existing client UI reads the auth role from document.cookie.

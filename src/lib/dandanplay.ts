@@ -19,7 +19,7 @@ export function getDandanplayCredentials(): DandanplayCredentials {
 }
 
 /**
- * Non-Docker web deployments use the maintainer-operated DecoTV instance as a
+ * Non-Docker web deployments use the maintainer-operated TanhaxTVinstance as a
  * relay. The published Docker image sets DOCKER_ENV=true and does not use it
  * implicitly, because public image usage should not consume the maintainer's
  * Vercel Hobby quota.

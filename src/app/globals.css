@@ -198,7 +198,7 @@ body {
   }
 }
 
-/* New DecoTV Brand Style */
+/* New TanhaxTVBrand Style */
 .deco-brand {
   background: linear-gradient(
     135deg,
@@ -1085,7 +1085,7 @@ div[data-media-provider] video {
   transform: scale(1);
 }
 
-/* DecoTV 炫酷动画效果 */
+/* TanhaxTV炫酷动画效果 */
 @keyframes blob {
   0%,
   100% {
