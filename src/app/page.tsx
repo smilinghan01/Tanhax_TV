@@ -15,7 +15,6 @@ import {
 
 import CapsuleSwitch from '@/components/CapsuleSwitch';
 import ContinueWatching from '@/components/ContinueWatching';
-import DecoTVFooterCard from '@/components/DecoTVFooterCard';
 import PageLayout from '@/components/PageLayout';
 import ScrollableRow from '@/components/ScrollableRow';
 import { useSite } from '@/components/SiteProvider';
@@ -462,8 +461,7 @@ function HomeClient() {
             </>
           )}
 
-          {/* DecoTV 底部炫酷卡片 */}
-          <DecoTVFooterCard />
+
         </div>
       </div>
       {announcement && showAnnouncement && (
