@@ -306,21 +306,24 @@ async function readTextWithLimit(response: Response, maxBytes: number) {
   let received = 0;
   let text = '';
 
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
 
-    received += value.byteLength;
-    if (received > maxBytes) {
-      await reader.cancel().catch(() => undefined);
-      throw new Error('Playlist too large');
+      received += value.byteLength;
+      if (received > maxBytes) {
+        throw new Error('Playlist too large');
+      }
+
+      text += decoder.decode(value, { stream: true });
     }
 
-    text += decoder.decode(value, { stream: true });
+    text += decoder.decode();
+    return text;
+  } finally {
+    await reader.cancel().catch(() => undefined);
   }
-
-  text += decoder.decode();
-  return text;
 }
 
 async function readBytesWithLimit(response: Response, maxBytes: number) {
@@ -329,13 +332,16 @@ async function readBytesWithLimit(response: Response, maxBytes: number) {
   const reader = response.body.getReader();
   let received = 0;
 
-  while (received < maxBytes) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    received += value.byteLength;
+  try {
+    while (received < maxBytes) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      received += Math.min(value.byteLength, maxBytes - received);
+    }
+  } finally {
+    await reader.cancel().catch(() => undefined);
   }
 
-  await reader.cancel().catch(() => undefined);
   return received;
 }
 
@@ -359,11 +365,6 @@ function parseResolutionWidth(line: string): number {
   return Number.isFinite(width) ? width : 0;
 }
 
-function extractUriAttribute(line: string): string | undefined {
-  const match = line.match(/\bURI=(?:"([^"]+)"|([^,\s]+))/i);
-  return match?.[1] || match?.[2] || undefined;
-}
-
 export function inspectHlsPlaylist(
   content: string,
   playlistUrl: string,
@@ -385,14 +386,12 @@ export function inspectHlsPlaylist(
       continue;
     }
 
+    // 跳过音频/iframe 子轨道标记，避免误将非视频 playlist 推入 variants
+    // （#EXT-X-MEDIA 的 RESOLUTION 也不纳入 maxWidth，仅视频 variant 才有效）
     if (
       line.startsWith('#EXT-X-MEDIA:') ||
       line.startsWith('#EXT-X-I-FRAME-STREAM-INF:')
     ) {
-      maxWidth = Math.max(maxWidth, parseResolutionWidth(line));
-      const uri = extractUriAttribute(line);
-      const resolved = uri ? resolvePlaylistUrl(playlistUrl, uri) : undefined;
-      if (resolved) variants.push(resolved);
       continue;
     }
 
@@ -424,12 +423,10 @@ export function inspectHlsPlaylist(
 }
 
 function isLikelyHlsContentType(contentType: string | null): boolean {
+  // HLS content types are all suffixed with "mpegurl":
+  //   application/vnd.apple.mpegurl, application/x-mpegURL, audio/mpegurl
   const lower = (contentType || '').toLowerCase();
-  return (
-    lower.includes('mpegurl') ||
-    lower.includes('vnd.apple.mpegurl') ||
-    lower.includes('x-mpegurl')
-  );
+  return lower.includes('mpegurl');
 }
 
 function isLikelyMediaContentType(contentType: string | null): boolean {
@@ -446,7 +443,8 @@ function speedFromBytes(
   elapsedMs: number,
 ): number | undefined {
   if (loadedBytes <= 0 || elapsedMs <= 0) return undefined;
-  return loadedBytes / 1024 / (elapsedMs / 1000);
+  const kbps = loadedBytes / 1024 / (elapsedMs / 1000);
+  return Number.isFinite(kbps) ? kbps : undefined;
 }
 
 async function probeMediaBytes(

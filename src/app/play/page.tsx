@@ -2027,7 +2027,7 @@ function PlayPageClient() {
         setSourceProbeProgress({
           running: false,
           mode: options.mode,
-          done: total,
+          done,
           total,
         });
       }
