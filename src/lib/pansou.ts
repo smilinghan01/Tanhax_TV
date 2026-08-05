@@ -1,4 +1,4 @@
-export const DEFAULT_PANSOU_SERVER_URL = 'https://pansou.katelya.eu.org/';
+export const DEFAULT_PANSOU_SERVER_URL = 'https://pansou.smiling.eu.org/';
 export const DEFAULT_PANSOU_NODE_NAME = '演示节点';
 export const MAX_PANSOU_NODE_COUNT = 32;
 

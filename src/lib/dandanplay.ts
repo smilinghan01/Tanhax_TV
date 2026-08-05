@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 
 export const DANDANPLAY_API_BASE = 'https://api.dandanplay.net';
-export const DEFAULT_DANDANPLAY_RELAY_ORIGIN = 'https://tv.katelya.eu.org';
+export const DEFAULT_DANDANPLAY_RELAY_ORIGIN = 'https://tv.smiling.eu.org';
 export const DANDANPLAY_RELAY_REQUEST_HEADER = 'x-decotv-dandanplay-relay';
 export const DANDANPLAY_NOT_CONFIGURED_MESSAGE =
   '弹弹play官方弹幕暂不可用：当前实例未配置有效的服务端凭证，且未启用或无法连接托管中继。Docker 可改用自定义弹幕节点或配置自有凭证。';

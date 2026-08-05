@@ -56,20 +56,10 @@ const DecoTVFooterCard = () => {
             </div>
 
             {/* Divider */}
-            <div className='flex justify-center items-center gap-4 mb-8 opacity-50'>
+            <div className='flex justify-center items-center gap-4 opacity-50'>
               <div className='h-px w-12 bg-gradient-to-r from-transparent to-gray-400 dark:to-gray-500'></div>
               <div className='w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-500'></div>
               <div className='h-px w-12 bg-gradient-to-l from-transparent to-gray-400 dark:to-gray-500'></div>
-            </div>
-
-            {/* Powered By Section */}
-            <div className='space-y-2'>
-              <p className='text-sm sm:text-base font-medium text-gray-500 dark:text-gray-400 uppercase tracking-widest'>
-                Powered by
-              </p>
-              <p className='text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-800 via-gray-600 to-gray-800 dark:from-white dark:via-gray-200 dark:to-white bg-clip-text text-transparent'>
-                Katelya
-              </p>
             </div>
           </div>
         </div>

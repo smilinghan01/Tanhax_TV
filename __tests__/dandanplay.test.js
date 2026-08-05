@@ -84,8 +84,8 @@ describe('dandanplay server integration helpers', () => {
       }),
     );
 
-    expect(getDandanplayRelayOrigin()).toBe('https://tv.katelya.eu.org');
-    expect(relayUrl.origin).toBe('https://tv.katelya.eu.org');
+    expect(getDandanplayRelayOrigin()).toBe('https://tv.smiling.eu.org');
+    expect(relayUrl.origin).toBe('https://tv.smiling.eu.org');
     expect(relayUrl.pathname).toBe('/api/danmu-external');
     expect(relayUrl.searchParams.get('episode')).toBe('1');
   });
@@ -95,7 +95,7 @@ describe('dandanplay server integration helpers', () => {
     delete process.env.DOCKER_ENV;
     expect(
       buildDandanplayRelayRequestUrl({
-        url: 'https://tv.katelya.eu.org/api/danmu-external?title=test',
+        url: 'https://tv.smiling.eu.org/api/danmu-external?title=test',
       }),
     ).toBeNull();
 

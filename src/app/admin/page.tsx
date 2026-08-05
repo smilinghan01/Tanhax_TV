@@ -7332,7 +7332,7 @@ const MAX_CUSTOM_DANMU_NODE_COUNT = 64;
 
 const RECOMMENDED_DANMU_SERVER = {
   name: '官方推荐/稳定节点',
-  url: 'https://danmu.katelya.eu.org',
+  url: 'https://danmu.smiling.eu.org',
   token: 'decotv',
   badge: '官方推荐',
 };
