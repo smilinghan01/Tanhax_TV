@@ -167,11 +167,6 @@
     "lzi": {
       "name": "量子资源站",
       "api": "https://cj.lziapi.com/api.php/provide/vod/"
-    },
-    "testSource": {
-      "name": "空内容测试源",
-      "api": "https://www.example.com/api.php/provide/vod",
-      "is_adult": true
     }
   },
   "custom_category": [],
