@@ -173,7 +173,7 @@ function LoginPageClient() {
   const [authMode, setAuthMode] = useState<'password' | 'public'>('password');
   // 默认使用图片直链
   const [loginBackground, setLoginBackground] = useState<string>(
-    'https://pan.yyds.nyc.mn/background.png',
+    'https://api.bimg.cc/random?w=1920&h=1080&mkt=zh-CN',
   );
 
   const { siteName } = useSite();
@@ -197,7 +197,7 @@ function LoginPageClient() {
         );
         // 设置登录背景图（如果服务器返回空，则使用默认值）
         setLoginBackground(
-          data.LoginBackground || 'https://pan.yyds.nyc.mn/background.png',
+          data.LoginBackground || 'https://api.bimg.cc/random?w=1920&h=1080&mkt=zh-CN',
         );
       })
       .catch(() => {

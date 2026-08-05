@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, no-console, @typescript-eslint/no-non-null-assertion */
 
+import fs from 'fs';
+import path from 'path';
+
 import { db } from '@/lib/db';
 
 import { AdminConfig, SearchResultLoadMode } from './admin.types';
@@ -489,7 +492,22 @@ export async function getConfig(): Promise<AdminConfig> {
 
   // db 中无配置，执行一次初始化
   if (!adminConfig) {
-    const initConfig = await getInitConfig('');
+    // 尝试加载默认配置文件
+    let defaultConfigFile = '';
+    try {
+      const defaultConfigPath = path.join(
+        process.cwd(),
+        'public',
+        'config.default.json',
+      );
+      if (fs.existsSync(defaultConfigPath)) {
+        defaultConfigFile = fs.readFileSync(defaultConfigPath, 'utf8');
+        console.log('[config] 已加载默认配置文件:', defaultConfigPath);
+      }
+    } catch (e) {
+      console.warn('[config] 加载默认配置文件失败:', e);
+    }
+    const initConfig = await getInitConfig(defaultConfigFile);
     return saveAdminConfigWithVerification(initConfig);
   }
 

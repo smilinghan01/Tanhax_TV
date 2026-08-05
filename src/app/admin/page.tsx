@@ -5373,7 +5373,7 @@ const SiteConfigComponent = ({
     DisableYellowFilter: false,
     FluidSearch: true,
     SearchResultLoadMode: 'infinite',
-    LoginBackground: 'https://pan.yyds.nyc.mn/background.png',
+    LoginBackground: 'https://api.bimg.cc/random?w=1920&h=1080&mkt=zh-CN',
   });
 
   // 广告过滤总开关（独立于 SiteConfig，立即保存到 /api/admin/adfilter）
@@ -5454,7 +5454,7 @@ const SiteConfigComponent = ({
             : 'infinite',
         LoginBackground:
           config.SiteConfig.LoginBackground ||
-          'https://pan.yyds.nyc.mn/background.png',
+          'https://api.bimg.cc/random?w=1920&h=1080&mkt=zh-CN',
       });
     }
     if (config?.AdFilterConfig) {
