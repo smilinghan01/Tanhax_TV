@@ -40,13 +40,6 @@ export interface PrivateLibraryConfig {
   connectors: PrivateLibraryConnector[];
 }
 
-export interface NetDiskConfig {
-  enabled: boolean;
-  pansouUrl: string;
-  timeout: number;
-  enabledCloudTypes: string[];
-}
-
 export type SearchResultLoadMode = 'infinite' | 'pagination';
 
 export interface AdminConfig {
@@ -142,7 +135,6 @@ export interface AdminConfig {
     ReverseProxy: string;
   };
   PrivateLibraryConfig?: PrivateLibraryConfig;
-  NetDiskConfig?: NetDiskConfig;
   AdFilterConfig?: {
     enabled: boolean;
   };
