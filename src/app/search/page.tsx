@@ -816,16 +816,9 @@ function SearchPageClient() {
   );
 
   useEffect(() => {
-    // 无搜索参数时聚焦搜索框，并确保搜索框完整可见（不被固定顶部导航栏遮挡）
-    if (!searchParams.get('q')) {
-      const input = document.getElementById('searchInput');
-      if (input) {
-        input.focus();
-        // 使用 scroll-margin-top 来避开固定定位的 TopNavbar 高度
-        input.style.scrollMarginTop = '80px';
-        input.scrollIntoView({ behavior: 'instant', block: 'start' });
-      }
-    }
+    // 无搜索参数时聚焦搜索框（阻止浏览器自动滚动）
+    !searchParams.get('q') &&
+      document.getElementById('searchInput')?.focus({ preventScroll: true });
 
     // 初始加载搜索历史
     void getSearchHistory()
@@ -1285,7 +1278,7 @@ function SearchPageClient() {
                   onClick={() => {
                     setSearchQuery('');
                     setShowSuggestions(false);
-                    document.getElementById('searchInput')?.focus();
+                    document.getElementById('searchInput')?.focus({ preventScroll: true });
                   }}
                   className='absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors dark:text-gray-500 dark:hover:text-gray-300'
                   aria-label='清除搜索内容'
