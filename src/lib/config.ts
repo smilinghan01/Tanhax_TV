@@ -324,6 +324,12 @@ async function getInitConfig(
     CustomCategories: [],
     LiveConfig: [],
     PanSouConfig: getDefaultPanSouConfig(),
+    NetDiskConfig: {
+      enabled: true,
+      pansouUrl: 'https://so.252035.xyz',
+      timeout: 30,
+      enabledCloudTypes: ['baidu', 'aliyun', 'quark'],
+    },
     TMDBConfig: {
       ApiKey: process.env.TMDB_API_KEY || '',
       ProxyType: process.env.TMDB_REVERSE_PROXY
@@ -459,6 +465,12 @@ export function getLocalModeConfig(): AdminConfig {
     CustomCategories: [],
     LiveConfig: [],
     PanSouConfig: getDefaultPanSouConfig(),
+    NetDiskConfig: {
+      enabled: true,
+      pansouUrl: 'https://so.252035.xyz',
+      timeout: 30,
+      enabledCloudTypes: ['baidu', 'aliyun', 'quark'],
+    },
     TMDBConfig: {
       ApiKey: process.env.TMDB_API_KEY || '',
       ProxyType: process.env.TMDB_REVERSE_PROXY
@@ -629,6 +641,16 @@ export function configSelfCheck(adminConfig: AdminConfig): AdminConfig {
   );
 
   adminConfig.PanSouConfig = normalizePanSouConfig(adminConfig.PanSouConfig);
+
+  // 确保网盘搜索配置有默认值
+  if (!adminConfig.NetDiskConfig) {
+    adminConfig.NetDiskConfig = {
+      enabled: true,
+      pansouUrl: 'https://so.252035.xyz',
+      timeout: 30,
+      enabledCloudTypes: ['baidu', 'aliyun', 'quark'],
+    };
+  }
 
   // 站长变更自检
   const ownerUser = process.env.USERNAME;
