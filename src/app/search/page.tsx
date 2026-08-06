@@ -816,8 +816,16 @@ function SearchPageClient() {
   );
 
   useEffect(() => {
-    // 无搜索参数时聚焦搜索框
-    !searchParams.get('q') && document.getElementById('searchInput')?.focus();
+    // 无搜索参数时聚焦搜索框，并确保搜索框完整可见（不被固定顶部导航栏遮挡）
+    if (!searchParams.get('q')) {
+      const input = document.getElementById('searchInput');
+      if (input) {
+        input.focus();
+        // 使用 scroll-margin-top 来避开固定定位的 TopNavbar 高度
+        input.style.scrollMarginTop = '80px';
+        input.scrollIntoView({ behavior: 'instant', block: 'start' });
+      }
+    }
 
     // 初始加载搜索历史
     void getSearchHistory()
