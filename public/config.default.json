@@ -128,14 +128,7 @@
       "name": "优质资源库",
       "api": "http://api.1080zyku.com/inc/api.php/provide/vod"
     },
-    "senlin": {
-      "name": "森林资源",
-      "api": "http://slapibf.com/api.php/provide/vod"
-    },
-    "aosika": {
-      "name": "奥斯卡资源网",
-      "api": "http://aosikazy.com/api.php/provide/vod"
-    },
+
     "aidan": {
       "name": "艾旦影视",
       "api": "http://lovedan.net/api.php/provide/vod"
@@ -143,10 +136,6 @@
     "jinying2": {
       "name": "金鹰资源2",
       "api": "http://jyzyapi.com/provide/vod/from/jinyingm3u8"
-    },
-    "uku2": {
-      "name": "U酷资源",
-      "api": "http://api.ukuapi.com/api.php/provide/vod"
     }
   },
   "custom_category": [],
