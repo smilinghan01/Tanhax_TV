@@ -124,11 +124,6 @@
       "name": "iKun资源",
       "api": "https://ikunzyapi.com/api.php/provide/vod"
     },
-    "youzhi": {
-      "name": "优质资源库",
-      "api": "http://api.1080zyku.com/inc/api.php/provide/vod"
-    },
-
     "aidan": {
       "name": "艾旦影视",
       "api": "http://lovedan.net/api.php/provide/vod"
