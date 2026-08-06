@@ -5373,7 +5373,7 @@ const SiteConfigComponent = ({
     DisableYellowFilter: false,
     FluidSearch: true,
     SearchResultLoadMode: 'infinite',
-    LoginBackground: 'https://api.bimg.cc/random?w=1920&h=1080&mkt=zh-CN',
+    LoginBackground: 'https://api.imlcd.cn/bg/high.php',
   });
 
   // 广告过滤总开关（独立于 SiteConfig，立即保存到 /api/admin/adfilter）
@@ -5454,7 +5454,7 @@ const SiteConfigComponent = ({
             : 'infinite',
         LoginBackground:
           config.SiteConfig.LoginBackground ||
-          'https://api.bimg.cc/random?w=1920&h=1080&mkt=zh-CN',
+          'https://api.imlcd.cn/bg/high.php',
       });
     }
     if (config?.AdFilterConfig) {

@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     // 🖼️ 登录页面背景图
     LoginBackground:
       config.SiteConfig.LoginBackground ||
-      'https://api.bimg.cc/random?w=1920&h=1080&mkt=zh-CN',
+      'https://api.imlcd.cn/bg/high.php',
     PrivateLibraryEnabled: Boolean(
       config.PrivateLibraryConfig?.connectors?.some((item) => item.enabled),
     ),
