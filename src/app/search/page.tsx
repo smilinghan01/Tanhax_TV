@@ -816,9 +816,8 @@ function SearchPageClient() {
   );
 
   useEffect(() => {
-    // 无搜索参数时聚焦搜索框（阻止浏览器自动滚动）
-    !searchParams.get('q') &&
-      document.getElementById('searchInput')?.focus({ preventScroll: true });
+    // 无搜索参数时聚焦搜索框
+    !searchParams.get('q') && document.getElementById('searchInput')?.focus();
 
     // 初始加载搜索历史
     void getSearchHistory()
@@ -1278,7 +1277,7 @@ function SearchPageClient() {
                   onClick={() => {
                     setSearchQuery('');
                     setShowSuggestions(false);
-                    document.getElementById('searchInput')?.focus({ preventScroll: true });
+                    document.getElementById('searchInput')?.focus();
                   }}
                   className='absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors dark:text-gray-500 dark:hover:text-gray-300'
                   aria-label='清除搜索内容'
