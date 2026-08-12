@@ -324,12 +324,6 @@ async function getInitConfig(
     CustomCategories: [],
     LiveConfig: [],
     PanSouConfig: getDefaultPanSouConfig(),
-    NetDiskConfig: {
-      enabled: true,
-      pansouUrl: 'https://so.252035.xyz',
-      timeout: 30,
-      enabledCloudTypes: ['baidu', 'aliyun', 'quark'],
-    },
     TMDBConfig: {
       ApiKey: process.env.TMDB_API_KEY || '',
       ProxyType: process.env.TMDB_REVERSE_PROXY
