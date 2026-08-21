@@ -2297,17 +2297,10 @@ function PlayPageClient() {
     if (directPlaybackRetryKeysRef.current.has(retryKey)) return false;
     directPlaybackRetryKeysRef.current.add(retryKey);
 
-    const rawEpisodeUrl =
-      detailRef.current?.episodes?.[episodeIndex] ||
-      detailRef.current?.episodes?.[0] ||
-      '';
-    if (rawEpisodeUrl) {
-      playbackUrlCacheRef.current.set(
-        `${activeSource}|${rawEpisodeUrl}`,
-        directUrl,
-      );
-    }
-
+    // 注意：不要将直连 URL 写入播放缓存。
+    // 直连丢失 referer（防盗链）与广告过滤，往往无法稳定播放；
+    // 若写入缓存，即使直连失败，后续重播同一集也会命中该缓存，
+    // 绕过代理导致反复失败。直连仅作为一次性应急降级尝试。
     resumeTimeRef.current =
       artPlayerRef.current?.currentTime || resumeTimeRef.current;
     setVideoLoadingStage('sourceChanging');
@@ -4130,7 +4123,11 @@ function PlayPageClient() {
                     ? '媒体分片加载失败，源不稳定'
                     : /buffer|media|codec/i.test(details)
                       ? '浏览器解码失败，源可能不兼容'
-                      : 'HLS 加载失败';
+                      : /levelLoadError|levelLoadTimeOut|keyLoadError/i.test(
+                          details,
+                        )
+                        ? '播放清单或密钥加载失败'
+                        : 'HLS 加载失败';
                 const hlsFailureKind: VideoSourceFailureKind =
                   /buffer|media|codec/i.test(details) ? 'media' : 'fragment';
 
