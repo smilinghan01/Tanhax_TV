@@ -74,6 +74,26 @@ import Toast from '@/components/Toast';
 import { useBangumiSubscription } from '@/contexts/BangumiSubscriptionContext';
 import { useDownloadManager } from '@/contexts/DownloadManagerContext';
 
+// 直连播放模式：从 m3u8 代理地址中解包出上游直连地址
+// 适用于代理清单响应超时（如 Vercel Serverless 函数超时）时绕过代理直接播放
+function extractUpstreamUrlFromProxy(url: string): string | null {
+  if (!url || typeof window === 'undefined') return null;
+  try {
+    const parsed = new URL(url, window.location.origin);
+    if (
+      parsed.pathname !== '/api/proxy/m3u8-filter' &&
+      parsed.pathname !== '/api/proxy/m3u8'
+    ) {
+      return null;
+    }
+    const upstreamUrl = parsed.searchParams.get('url');
+    if (!upstreamUrl || !/^https?:\/\//i.test(upstreamUrl)) return null;
+    return upstreamUrl;
+  } catch {
+    return null;
+  }
+}
+
 const DanmuManualMatchModal = dynamic<DanmuManualMatchModalProps>(
   () =>
     import('../../components/DanmuManualMatchModal').then((mod) => mod.default),
@@ -731,6 +751,21 @@ function PlayPageClient() {
     blockAdEnabledRef.current = blockAdEnabled;
   }, [blockAdEnabled]);
 
+  // 直连播放开关（绕过代理直接播放上游地址，适用于代理清单响应超时的场景）
+  const [directPlaybackEnabled, setDirectPlaybackEnabled] = useState<boolean>(
+    () => {
+      if (typeof window !== 'undefined') {
+        const v = localStorage.getItem('playDirectConnect');
+        if (v !== null) return v === 'true';
+      }
+      return false;
+    },
+  );
+  const directPlaybackRef = useRef(directPlaybackEnabled);
+  useEffect(() => {
+    directPlaybackRef.current = directPlaybackEnabled;
+  }, [directPlaybackEnabled]);
+
   // 获取 HLS 缓冲配置（根据用户设置的模式）
   const getHlsBufferConfig = () => {
     const mode =
@@ -1002,11 +1037,19 @@ function PlayPageClient() {
         };
       }
 
+      // 直连模式：先解包出上游直连地址，并隔离缓存，避免命中代理地址缓存
+      const directMode = !!directPlaybackRef.current;
+      const workingUrl = directMode
+        ? (extractUpstreamUrlFromProxy(trimmedUrl) || trimmedUrl)
+        : trimmedUrl;
+
       const immediatePlayback = selectImmediatePlaybackUrl({
-        rawUrl: trimmedUrl,
+        rawUrl: workingUrl,
         sourceKey,
         currentSourceKey: currentSourceRef.current,
-        cache: playbackUrlCacheRef.current,
+        cache: directMode
+          ? new Map<string, string>()
+          : playbackUrlCacheRef.current,
         origin:
           typeof window !== 'undefined'
             ? window.location.origin
@@ -1019,14 +1062,16 @@ function PlayPageClient() {
           originalUrl: trimmedUrl,
           mediaType: isLikelyHlsUrl(immediatePlayback.url) ? 'hls' : 'file',
           resolved:
-            immediatePlayback.fromCache && immediatePlayback.url !== trimmedUrl,
+            immediatePlayback.fromCache && immediatePlayback.url !== workingUrl,
         };
       }
 
-      const cacheKey = `${sourceKey || currentSourceRef.current || ''}|${trimmedUrl}`;
+      const cacheKey = `${directMode ? 'direct|' : ''}${
+        sourceKey || currentSourceRef.current || ''
+      }|${workingUrl}`;
 
       const params = new URLSearchParams();
-      params.set('url', trimmedUrl);
+      params.set('url', workingUrl);
       const effectiveSource = sourceKey || currentSourceRef.current;
       if (effectiveSource) params.set('source', effectiveSource);
 
@@ -1039,6 +1084,8 @@ function PlayPageClient() {
       } catch {
         // ignore
       }
+      // 直连模式强制要求服务端不进行代理包装
+      if (directMode) params.set('adfilter', 'direct');
 
       try {
         const response = await fetch(`/api/playback/resolve?${params}`, {
@@ -1050,14 +1097,18 @@ function PlayPageClient() {
         }
 
         const payload = (await response.json()) as PlaybackResolveResponse;
-        const resolvedUrl = payload.playbackUrl || payload.resolvedUrl || '';
+        let resolvedUrl = payload.playbackUrl || payload.resolvedUrl || '';
+        // 直连模式下若服务端仍返回代理地址，客户端再次解包
+        if (directMode && resolvedUrl) {
+          resolvedUrl = extractUpstreamUrlFromProxy(resolvedUrl) || resolvedUrl;
+        }
         if (resolvedUrl && payload.mediaType !== 'page') {
           playbackUrlCacheRef.current.set(cacheKey, resolvedUrl);
           return {
             ...payload,
             playbackUrl: resolvedUrl,
             resolvedUrl,
-            originalUrl: payload.originalUrl || trimmedUrl,
+            originalUrl: payload.originalUrl || workingUrl,
             mediaType:
               payload.mediaType ||
               (isLikelyHlsUrl(resolvedUrl) ? 'hls' : 'unknown'),
@@ -1066,9 +1117,9 @@ function PlayPageClient() {
 
         return {
           ...payload,
-          playbackUrl: resolvedUrl || trimmedUrl,
-          resolvedUrl: resolvedUrl || payload.resolvedUrl || trimmedUrl,
-          originalUrl: payload.originalUrl || trimmedUrl,
+          playbackUrl: resolvedUrl || workingUrl,
+          resolvedUrl: resolvedUrl || payload.resolvedUrl || workingUrl,
+          originalUrl: payload.originalUrl || workingUrl,
           mediaType: payload.mediaType || 'unknown',
           error: payload.error || '未解析到可播放媒体地址',
         };
@@ -1080,10 +1131,10 @@ function PlayPageClient() {
       }
 
       return {
-        playbackUrl: trimmedUrl,
-        resolvedUrl: trimmedUrl,
+        playbackUrl: workingUrl,
+        resolvedUrl: workingUrl,
         originalUrl: trimmedUrl,
-        mediaType: isLikelyHlsUrl(trimmedUrl) ? 'hls' : 'unknown',
+        mediaType: isLikelyHlsUrl(workingUrl) ? 'hls' : 'unknown',
         resolved: false,
         error: '无法解析播放地址',
       };
@@ -1110,8 +1161,14 @@ function PlayPageClient() {
       timeoutMs: number,
       signal?: AbortSignal,
     ): Promise<PlaybackProbeResponse> => {
+      // 直连模式：解包上游直连地址并通知服务端不做代理包装
+      const directMode = !!directPlaybackRef.current;
+      const workingUrl = directMode
+        ? (extractUpstreamUrlFromProxy(rawUrl) || rawUrl)
+        : rawUrl;
+
       const params = new URLSearchParams();
-      params.set('url', rawUrl);
+      params.set('url', workingUrl);
       params.set('timeoutMs', String(timeoutMs));
       if (sourceKey) params.set('source', sourceKey);
 
@@ -1124,6 +1181,8 @@ function PlayPageClient() {
       } catch {
         // ignore
       }
+      // 直连模式强制要求服务端不进行代理包装
+      if (directMode) params.set('adfilter', 'direct');
 
       const response = await fetch(`/api/playback/probe?${params}`, {
         cache: 'no-store',
@@ -2220,6 +2279,14 @@ function PlayPageClient() {
     }
   };
 
+  // 重新加载当前视频（用于直连/代理开关切换后应用新模式）
+  const reloadCurrentVideoRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    reloadCurrentVideoRef.current = () => {
+      void updateVideoUrl(detailRef.current, currentEpisodeIndexRef.current);
+    };
+  });
+
   const ensureVideoSource = (video: HTMLVideoElement | null, url: string) => {
     if (!video || !url) return;
     preparePlaybackVideoElement(video);
@@ -2979,9 +3046,12 @@ function PlayPageClient() {
       id: string,
     ): Promise<SearchResult[]> => {
       try {
-        const detailResponse = await fetch(
-          `/api/detail?source=${source}&id=${id}`,
-        );
+        // 直连模式下让服务端返回未代理包装的直连地址
+        const detailParams = new URLSearchParams({ source, id });
+        if (directPlaybackRef.current) {
+          detailParams.set('adfilter', 'direct');
+        }
+        const detailResponse = await fetch(`/api/detail?${detailParams}`);
         if (!detailResponse.ok) {
           throw new Error('获取视频详情失败');
         }
@@ -4212,6 +4282,27 @@ function PlayPageClient() {
                 // ignore
               }
               return newVal ? '当前开启' : '当前关闭';
+            },
+          },
+          {
+            name: '直连播放',
+            html: '直连播放',
+            tooltip: directPlaybackEnabled
+              ? '直连上游（绕过代理）'
+              : '通过代理播放（推荐）',
+            switch: directPlaybackEnabled,
+            onSwitch: function (item) {
+              const newVal = !item.switch;
+              try {
+                localStorage.setItem('playDirectConnect', String(newVal));
+                directPlaybackRef.current = newVal;
+                setDirectPlaybackEnabled(newVal);
+                // 重新解析当前视频地址以应用直连/代理模式
+                reloadCurrentVideoRef.current();
+              } catch {
+                // ignore
+              }
+              return newVal;
             },
           },
           {
