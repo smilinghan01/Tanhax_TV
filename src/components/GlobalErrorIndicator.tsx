@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface ErrorInfo {
   id: string;
@@ -12,8 +12,13 @@ export function GlobalErrorIndicator() {
   const [currentError, setCurrentError] = useState<ErrorInfo | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isReplacing, setIsReplacing] = useState(false);
+  // 用 ref 跟踪当前错误，避免监听器因依赖 currentError 反复重新绑定
+  const currentErrorRef = useRef<ErrorInfo | null>(null);
 
   useEffect(() => {
+    // 替换动画计时器，组件卸载时清理
+    let replaceTimer: ReturnType<typeof setTimeout> | null = null;
+
     // 监听自定义错误事件
     const handleError = (event: CustomEvent) => {
       const { message } = event.detail;
@@ -24,18 +29,20 @@ export function GlobalErrorIndicator() {
       };
 
       // 如果已有错误，开始替换动画
-      if (currentError) {
+      if (currentErrorRef.current) {
         setCurrentError(newError);
         setIsReplacing(true);
 
         // 动画完成后恢复正常
-        setTimeout(() => {
+        if (replaceTimer) clearTimeout(replaceTimer);
+        replaceTimer = setTimeout(() => {
           setIsReplacing(false);
         }, 200);
       } else {
         // 第一次显示错误
         setCurrentError(newError);
       }
+      currentErrorRef.current = newError;
 
       setIsVisible(true);
     };
@@ -45,12 +52,14 @@ export function GlobalErrorIndicator() {
 
     return () => {
       window.removeEventListener('globalError', handleError as EventListener);
+      if (replaceTimer) clearTimeout(replaceTimer);
     };
-  }, [currentError]);
+  }, []);
 
   const handleClose = () => {
     setIsVisible(false);
     setCurrentError(null);
+    currentErrorRef.current = null;
     setIsReplacing(false);
   };
 

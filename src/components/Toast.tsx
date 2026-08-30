@@ -20,15 +20,19 @@ export default function Toast({
   const [isLeaving, setIsLeaving] = useState(false);
 
   useEffect(() => {
+    let leaveTimer: ReturnType<typeof setTimeout> | null = null;
     const timer = setTimeout(() => {
       setIsLeaving(true);
-      setTimeout(() => {
+      leaveTimer = setTimeout(() => {
         setIsVisible(false);
         onClose?.();
       }, 300);
     }, duration);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (leaveTimer) clearTimeout(leaveTimer);
+    };
   }, [duration, onClose]);
 
   if (!isVisible) return null;

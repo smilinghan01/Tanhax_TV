@@ -193,7 +193,13 @@ export const UserMenu: React.FC = () => {
         'defaultAggregateSearch',
       );
       if (savedAggregateSearch !== null) {
-        setDefaultAggregateSearch(JSON.parse(savedAggregateSearch));
+        try {
+          setDefaultAggregateSearch(
+            JSON.parse(savedAggregateSearch) === true,
+          );
+        } catch {
+          setDefaultAggregateSearch(false);
+        }
       }
 
       const savedDoubanDataSource = localStorage.getItem('doubanDataSource');
@@ -239,21 +245,33 @@ export const UserMenu: React.FC = () => {
       const savedEnableOptimization =
         localStorage.getItem('enableOptimization');
       if (savedEnableOptimization !== null) {
-        setEnableOptimization(JSON.parse(savedEnableOptimization));
+        try {
+          setEnableOptimization(JSON.parse(savedEnableOptimization) === true);
+        } catch {
+          setEnableOptimization(false);
+        }
       }
 
       const savedFluidSearch = localStorage.getItem('fluidSearch');
       const defaultFluidSearch =
         (window as any).RUNTIME_CONFIG?.FLUID_SEARCH !== false;
       if (savedFluidSearch !== null) {
-        setFluidSearch(JSON.parse(savedFluidSearch));
+        try {
+          setFluidSearch(JSON.parse(savedFluidSearch) === true);
+        } catch {
+          setFluidSearch(defaultFluidSearch);
+        }
       } else if (defaultFluidSearch !== undefined) {
         setFluidSearch(defaultFluidSearch);
       }
 
       const savedLiveDirectConnect = localStorage.getItem('liveDirectConnect');
       if (savedLiveDirectConnect !== null) {
-        setLiveDirectConnect(JSON.parse(savedLiveDirectConnect));
+        try {
+          setLiveDirectConnect(JSON.parse(savedLiveDirectConnect) === true);
+        } catch {
+          setLiveDirectConnect(false);
+        }
       }
 
       // 读取播放缓冲模式

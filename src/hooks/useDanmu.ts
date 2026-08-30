@@ -150,6 +150,8 @@ export function useDanmu(params: UseDanmuParams): UseDanmuResult {
 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const lastFetchKeyRef = useRef<string>('');
+  // 最近一次发起的请求 key，用于丢弃过期响应（快速切集时旧弹幕不覆盖新弹幕）
+  const latestRequestKeyRef = useRef<string>('');
 
   useEffect(() => {
     setSettings(loadSettingsFromStorage());
@@ -183,12 +185,16 @@ export function useDanmu(params: UseDanmuParams): UseDanmuResult {
         cacheKey && activeManualOverride
           ? `${cacheKey}__manual_${activeManualOverride.animeId}_${activeManualOverride.episodeId}`
           : cacheKey;
+      // 标记为最新请求：快速切集/换源时旧请求的响应将被丢弃
+      latestRequestKeyRef.current = requestCacheKey;
 
       const applyResult = (
         danmus: DanmuItem[],
         match: DanmuMatchInfo | null,
         source: DanmuLoadMeta['source'],
       ) => {
+        // 过期响应保护：期间已发起更新的请求（切换了剧集/源），丢弃本次结果
+        if (latestRequestKeyRef.current !== requestCacheKey) return;
         const now = Date.now();
         setDanmuList(danmus);
         setMatchInfo(match);

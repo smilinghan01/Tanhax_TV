@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { ApiSite } from '@/lib/config';
 import {
@@ -208,6 +208,8 @@ export function useSourceFilter(
   const [isLoadingSources, setIsLoadingSources] = useState(false);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // 分类请求序号：快速切换源时丢弃过期响应
+  const categoryRequestSeqRef = useRef(0);
 
   const fetchSources = useCallback(async () => {
     setIsLoadingSources(true);
@@ -261,6 +263,7 @@ export function useSourceFilter(
         return;
       }
 
+      const requestSeq = ++categoryRequestSeqRef.current;
       setIsLoadingCategories(true);
       setError(null);
 
@@ -285,15 +288,21 @@ export function useSourceFilter(
           throw new Error('获取分类列表失败');
         }
 
+        // 过期响应保护：期间已切换了源，丢弃本次结果
+        if (requestSeq !== categoryRequestSeqRef.current) return;
         const data = (await response.json()) as SourceCategoryResponse;
+        if (requestSeq !== categoryRequestSeqRef.current) return;
         const categories = extractSourceCategories(data);
         setSourceCategories(categories);
       } catch (err) {
+        if (requestSeq !== categoryRequestSeqRef.current) return;
         console.error('获取源分类失败:', err);
         setError(err instanceof Error ? err.message : '获取分类失败');
         setSourceCategories([]);
       } finally {
-        setIsLoadingCategories(false);
+        if (requestSeq === categoryRequestSeqRef.current) {
+          setIsLoadingCategories(false);
+        }
       }
     },
     [sources],

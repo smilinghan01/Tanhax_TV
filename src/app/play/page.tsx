@@ -3184,12 +3184,19 @@ function PlayPageClient() {
       setLoadingMessage('✨ 准备就绪，即将开始播放...');
 
       // 短暂延迟让用户看到完成状态
-      setTimeout(() => {
+      readyTimer = setTimeout(() => {
         setLoading(false);
       }, 1000);
     };
 
+    // 加载完成计时器（组件卸载时清理，避免卸载后触发 setState）
+    let readyTimer: ReturnType<typeof setTimeout> | null = null;
+
     initAll();
+
+    return () => {
+      if (readyTimer) clearTimeout(readyTimer);
+    };
   }, []);
 
   // 播放记录处理

@@ -316,7 +316,11 @@ function SearchPageClient() {
     if (typeof window !== 'undefined') {
       const userSetting = localStorage.getItem('defaultAggregateSearch');
       if (userSetting !== null) {
-        return JSON.parse(userSetting);
+        try {
+          return JSON.parse(userSetting) === true;
+        } catch {
+          return true; // 本地设置损坏时回退默认
+        }
       }
     }
     return true; // 默认启用聚合
@@ -835,7 +839,11 @@ function SearchPageClient() {
       const defaultFluidSearch =
         (window as any).RUNTIME_CONFIG?.FLUID_SEARCH !== false;
       if (savedFluidSearch !== null) {
-        setUseFluidSearch(JSON.parse(savedFluidSearch));
+        try {
+          setUseFluidSearch(JSON.parse(savedFluidSearch) === true);
+        } catch {
+          setUseFluidSearch(defaultFluidSearch);
+        }
       } else if (defaultFluidSearch !== undefined) {
         setUseFluidSearch(defaultFluidSearch);
       }

@@ -250,6 +250,9 @@ export function useDoubanInfo(
   const [recommendsError, setRecommendsError] = useState<Error | null>(null);
 
   const detailRequestIdRef = useRef(0);
+  // 评论/推荐请求序号：快速切换视频时丢弃过期响应
+  const commentsRequestIdRef = useRef(0);
+  const recommendsRequestIdRef = useRef(0);
 
   const applyDetailPayload = useCallback((data: DoubanDetailProxyResponse) => {
     setDetail(data);
@@ -324,6 +327,7 @@ export function useDoubanInfo(
 
     setCommentsLoading(true);
     setCommentsError(null);
+    const requestId = ++commentsRequestIdRef.current;
 
     try {
       console.log('[useDoubanInfo] 获取评论:', doubanId);
@@ -331,16 +335,20 @@ export function useDoubanInfo(
         `movie/subject/${doubanId}/comments`,
       )) as { comments?: DoubanComment[]; total?: number };
 
+      if (requestId !== commentsRequestIdRef.current) return;
       if (data && data.comments) {
         setComments(data.comments);
         setCommentsTotal(data.total || data.comments.length);
         console.log('[useDoubanInfo] 评论获取成功:', data.comments.length);
       }
     } catch (error) {
+      if (requestId !== commentsRequestIdRef.current) return;
       console.error('[useDoubanInfo] 评论获取失败:', error);
       setCommentsError(error instanceof Error ? error : new Error('未知错误'));
     } finally {
-      setCommentsLoading(false);
+      if (requestId === commentsRequestIdRef.current) {
+        setCommentsLoading(false);
+      }
     }
   }, [comments.length, doubanId]);
 
@@ -350,6 +358,7 @@ export function useDoubanInfo(
 
     setRecommendsLoading(true);
     setRecommendsError(null);
+    const requestId = ++recommendsRequestIdRef.current;
 
     try {
       console.log('[useDoubanInfo] 获取推荐:', doubanId);
@@ -363,6 +372,7 @@ export function useDoubanInfo(
         }>;
       };
 
+      if (requestId !== recommendsRequestIdRef.current) return;
       if (data && data.recommendations) {
         const transformedRecommends = data.recommendations.map((r) => ({
           id: r.id,
@@ -377,12 +387,15 @@ export function useDoubanInfo(
         );
       }
     } catch (error) {
+      if (requestId !== recommendsRequestIdRef.current) return;
       console.error('[useDoubanInfo] 推荐获取失败:', error);
       setRecommendsError(
         error instanceof Error ? error : new Error('未知错误'),
       );
     } finally {
-      setRecommendsLoading(false);
+      if (requestId === recommendsRequestIdRef.current) {
+        setRecommendsLoading(false);
+      }
     }
   }, [doubanId, recommends.length]);
 

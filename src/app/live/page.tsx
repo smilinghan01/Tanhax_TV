@@ -1393,9 +1393,13 @@ function LivePageClient() {
     fetchLiveSources();
 
     // 初始化直连模式状态
-    const savedDirectConnect = localStorage.getItem('liveDirectConnect');
-    if (savedDirectConnect !== null) {
-      setIsDirectConnect(savedDirectConnect === 'true');
+    try {
+      const savedDirectConnect = localStorage.getItem('liveDirectConnect');
+      if (savedDirectConnect !== null) {
+        setIsDirectConnect(savedDirectConnect === 'true');
+      }
+    } catch {
+      // 隐私模式等场景下读取失败时使用默认值
     }
 
     const savedAutoFailover = localStorage.getItem(AUTO_FAILOVER_STORAGE_KEY);
